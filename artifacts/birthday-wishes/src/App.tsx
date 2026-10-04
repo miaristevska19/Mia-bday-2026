@@ -144,6 +144,54 @@ const starterGifts: Gift[] = [
     url: 'https://www.ubuy.fr/en/product/TMYYLF61A-morgan-matchbox-embossed-saffiano-leather-small-slim-bifold-wallet?srsltid=AU7gw4UZmU_Vbxjtvu1k6No20m5BzJqxE9jzA9hKLhOc2rnlUY0tJIlt0XY',
     image: 'images/wallet.jpg',
   },
+  {
+    id: 'epilator',
+    name: 'Braun Kit Епилатор',
+    price: 180,
+    note: 'За нега и убавина',
+    url: 'https://fr.braun.com/fr-fr/female-hair-removal/epilators/silk-epil-9-flex/silk-epil-9-flex-9-030-bundle',
+    image: 'images/epilator.jpg',
+  },
+   {
+    id: 'ouzo',
+    name: 'Шише Узо',
+    price: 16,
+    note: '8 месеци and counting без узо 💔',
+    url: 'https://www.urban-drinks.fr/ouzo-12-07l-38-vol.html?srsltid=AU7gw4Wmqmm3qnFz7FnhcbtvrYkneU64sWf59QWsLKMrc6ASjy89vLiu',
+    image: 'images/ouzo.jpg',
+  },
+  {
+    id: 'booknook',
+    name: 'Book Nook DIY макета',
+    price: 45,
+    note: 'За декорација хихи',
+    url: 'https://www.fnac.com/Maquette-Rolife-Serre-livres-Book-Nook-Arcade-dating/a21417252/w-4',
+    image: 'images/booknook.jpg',
+  },
+  {
+    id: 'cocktail',
+    name: 'Сет за коктели',
+    price: 49,
+    note: 'Someone has to take one for the team',
+    url: 'https://www.fnac.com/mp44515409/Kit-10PCS-Cocktail-Shaker-Melangeur-Outil-Barman-En-Acier-Inoxydable-750ML/w-4?oref=0ae2a764-69a6-b79b-f489-2192267eda32',
+    image: 'images/cocktail.jpg',
+  },
+  {
+    id: 'brushes',
+    name: 'Сет четки за шминка - очи ',
+    price: 26,
+    note: 'Не мора и баш овие, ама ми требаат',
+    url: 'https://www.zalando.fr/luvia-cosmetics-all-eye-want-set-de-brosses-a-maquillage-pearl-whitecoffee-brown-lui34j00i-t11.html',
+    image: 'images/brushes.jpg',
+  },
+  {
+    id: 'kolk',
+    name: 'Колк шо не крцка',
+    price: 9999999999999,
+    note: 'Можи и from the dark web, не се жалам',
+    url: 'https://www.zalando.fr/luvia-cosmetics-all-eye-want-set-de-brosses-a-maquillage-pearl-whitecoffee-brown-lui34j00i-t11.html',
+    image: 'images/kolk.jpg',
+  },
 ];
 const noButtonOffsets = [
   { x: 72, y: -18 },
@@ -152,7 +200,11 @@ const noButtonOffsets = [
   { x: -68, y: -20 },
   { x: 26, y: -30 },
 ];
-const money = (amount: number) => (amount >= 1000000000 ? '∞' : `€${amount}`);
+const money = (amount: number) => (
+  amount >= 1000000000 
+    ? <span className="infinity-price">∞</span> 
+    : `€${amount}`
+);
 
 function validateGifts(input: unknown): Gift[] | null {
   if (!Array.isArray(input) || input.length > 100) return null;

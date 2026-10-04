@@ -123,6 +123,7 @@ button { cursor: pointer; }
 .gift-info strong { display: block; font: 500 20px var(--app-font-serif); text-transform: capitalize; }
 .gift-info p { margin: 4px 0 0; color: hsl(var(--muted-foreground)); font-size: 12px; }
 .gift-price { color: hsl(var(--primary)); font: 500 17px var(--app-font-mono); }
+.infinity-price { font-size: 38px; font-weight: 700; line-height: 1; }
 .gift-link { display: inline-block; margin-top: 6px; color: hsl(var(--primary)); font-size: 12px; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .empty-state { margin-top: 28px; padding: 32px; border: 1px dashed hsl(var(--border)); background: hsl(120 34% 95%); text-align: center; }
 .empty-state strong { display: block; font: 500 22px var(--app-font-serif); }
