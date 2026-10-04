@@ -15,7 +15,7 @@ type OwnerAccess = { claimed: boolean; isOwner: boolean };
 const STORAGE_KEY = 'birthday-wishes-v1';
 const BUDGET_LIMITS_STORAGE_KEY = 'birthday-wishes-budget-limits-v1';
 const budgetTierLabels = [
-  'Од мене толку од госпо поќе',
+  'Од мене толку од, госпо поќе',
   'не барам многу',
   'не барам многу премиум+',
 ] as const;
@@ -33,7 +33,7 @@ function makeBudgetTiers(limits: number[] = defaultBudgetLimits): BudgetTier[] {
 // A gift is shown when its price is above "above" and up to (and including) "upTo".
 type BudgetOption = { id: string; label: string; description: string; title: string; subtitle: string; above: number; upTo: number };
 const budgetOptions: BudgetOption[] = [
-  { id: 'category-1', label: 'Од мене толку од госпо поќе', description: 'До 59€', title: 'Категорија: Од мене толку, од госпо поќе', subtitle: 'Мали ситници ама голема среќа ❤️', above: -1, upTo: 59 },
+  { id: 'category-1', label: 'Од мене толку од, госпо поќе', description: 'До 59€', title: 'Категорија: Од мене толку, од госпо поќе', subtitle: 'Мали ситници ама голема среќа ❤️', above: -1, upTo: 59 },
   { id: 'category-2', label: 'Не барам многу', description: 'Од 59 до 150€', title: 'Категорија: Не барам многу', subtitle: 'Поголеми ситници иста среќа ✨', above: 59, upTo: 150 },
   { id: 'category-3', label: 'Не барам многу Премиум+', description: 'Над 150€', title: 'Категорија: Не барам многу Премиум+', subtitle: 'Нешто поскапичко 💸', above: 150, upTo: Infinity },
   { id: 'any', label: 'Не барам многу Инфинити ∞', description: 'Сите подароци', title: 'Категорија: Не барам многу Инфинити ∞', subtitle: 'Се шо ви душа сака 🎁', above: -1, upTo: Infinity },
@@ -135,6 +135,14 @@ const starterGifts: Gift[] = [
     note: 'Preorder -> amazon, стига Јануари',
     url: 'https://www.amazon.fr/gp/product/1037205693/ref=ewc_pr_img_4?smid=A1X6FK5RDHNB96&psc=1',
     image: 'images/kniga2.jpg',
+  },
+  {
+    id: 'wallet',
+    name: 'Kate Spade Matchbox новчаник',
+    price: 138,
+    note: 'Едвај ја најдов оваа лепота во Европа',
+    url: 'https://www.ubuy.fr/en/product/TMYYLF61A-morgan-matchbox-embossed-saffiano-leather-small-slim-bifold-wallet?srsltid=AU7gw4UZmU_Vbxjtvu1k6No20m5BzJqxE9jzA9hKLhOc2rnlUY0tJIlt0XY',
+    image: 'images/wallet.jpg',
   },
 ];
 const noButtonOffsets = [
@@ -421,8 +429,23 @@ function Home() {
       <style>{giftCardStyles}</style>
       <div className="app-content">
         <header className="topbar">
-          <a href="/" className="brand" aria-label="Скромна роденденска листа" onClick={(event) => { event.preventDefault(); setStep('intro'); setBudget(null); setEditing(false); }}>
-            <span className="brand-mark">с</span><span className="brand-name">Скромна роденденска листа</span>
+          <a 
+            href="/" 
+            className="brand" 
+            aria-label="Скромна роденденска листа" 
+            onClick={(event) => { 
+              event.preventDefault(); 
+              setStep('intro'); 
+              setBudget(null); 
+              setEditing(false); 
+            }}
+          >
+            <img
+              className="brand-icon"
+              src={`${import.meta.env.BASE_URL}images/icon.png`}
+              alt=""
+            />
+            <span className="brand-name">Скромна роденденска листа</span>
           </a>
         </header>
         {shareError && <div className="warning-banner" role="alert" data-testid="status-invalid-share">Овој линк не можевме да го отвориме. Ја прикажуваме зачуваната листа, која сè уште можеш да ја уредуваш.</div>}
@@ -457,7 +480,7 @@ function Home() {
               <div className="sun-disc" />
               <span className="spark one">+</span><span className="spark two">×</span><span className="spark three">+</span>
               <div className="gift-box"><div className="bow" /><div className="gift-tag">for me</div></div>
-              <div className="ribbon-note">со љубов од моите омилени</div>
+              <div className="ribbon-note">Со љубов од моите омилени</div>
             </div>
           </section>
         )}
@@ -467,7 +490,7 @@ function Home() {
             <div className="step-top"><span className="step-count">01 / 02 · роденденски желби</span><span className="step-track"><i /></span></div>
             <span className="eyebrow">Прво, избери буџет</span>
             <h2 id="budget-title">Избери категорија</h2>
-            <p className="step-subtitle">избери категорија за да ги видиш поклоните според твоите можности</p>
+            <p className="step-subtitle">Избери категорија за да ги видиш поклоните според твоите можности</p>
             <div className="budget-options">
               {budgetOptions.map((option) => (
                 <button key={option.id} className="budget-option" onClick={() => stepToGifts(option)} data-testid={`button-budget-${option.id}`}>
