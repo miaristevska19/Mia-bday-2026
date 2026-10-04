@@ -15,7 +15,7 @@ type OwnerAccess = { claimed: boolean; isOwner: boolean };
 const STORAGE_KEY = 'birthday-wishes-v1';
 const BUDGET_LIMITS_STORAGE_KEY = 'birthday-wishes-budget-limits-v1';
 const budgetTierLabels = [
-  'Од мене толку од, госпо поќе',
+  'Од мене толку, од госпо поќе',
   'не барам многу',
   'не барам многу премиум+',
 ] as const;
@@ -302,16 +302,19 @@ const giftCardStyles = `
   .budget-option { position: relative; display: grid !important; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px; width: 100%; text-align: left !important; padding: 20px 24px !important; border-radius: 22px !important; cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease; }
   .budget-option::before { content: attr(data-badge); display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 50%; border: 2px solid currentColor; font-size: 1.25rem; font-weight: 700; }
   .budget-option .tier-text { display: flex !important; flex-direction: column; gap: 4px; color: inherit !important; opacity: 1 !important; }
-  .budget-option .tier-text strong { font-size: 1.15rem !important; line-height: 1.25 !important; }
+  .budget-option .tier-text strong { font-size: 1.15rem !important; line-height: 1.25 !important; font-weight: 800 !important; }
   .budget-option .tier-text small { font-size: 0.95rem; opacity: 0.8; }
-  .budget-option .tier-price { font-size: 1.05rem !important; font-weight: 700 !important; white-space: nowrap; text-align: right; color: inherit !important; opacity: 1 !important; }
+  .budget-option .tier-price { font-size: 1.05rem !important; font-weight: 400 !important; white-space: nowrap; text-align: right; color: inherit !important; opacity: 0.85 !important; }
   .budget-option[data-tier="1"] { max-width: 86%; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
   .budget-option[data-tier="2"] { max-width: 91%; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
   .budget-option[data-tier="3"] { max-width: 96%; box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16); }
   .budget-option[data-tier="4"] { max-width: 100%; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24); }
   .budget-option[data-tier="4"] .tier-text strong { font-size: 1.3rem !important; }
   .budget-option:hover { transform: translateY(-3px); }
-  .budget-option:not(:last-child)::after { content: '↓'; position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); font-size: 1.1rem; line-height: 1; opacity: 0.55; }
+
+  .back-button { display: inline-flex !important; align-items: center; gap: 8px; padding: 10px 20px !important; border: 1.5px solid currentColor !important; border-radius: 999px !important; font-size: 1rem !important; font-weight: 600 !important; text-decoration: none !important; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .back-button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14); }
+  .gift-row .gift-info strong, .gift-row .gift-info p { text-transform: none !important; }
 
   @media (max-width: 600px) {
     .budget-option, .budget-option[data-tier] { max-width: 100% !important; padding: 16px 18px !important; gap: 14px !important; grid-template-columns: auto minmax(0, 1fr) !important; }
@@ -609,7 +612,7 @@ function Home() {
               ))}
             </div>
             <div className="step-actions">
-              <button className="text-button" onClick={goBack} data-testid="button-back-intro"><ArrowLeft size={15} /> Назад</button>
+              <button className="text-button back-button" onClick={goBack} data-testid="button-back-intro"><ArrowLeft size={15} /> Назад</button>
               <span className="step-count">За Миа</span>
             </div>
           </section>
@@ -701,7 +704,7 @@ function Home() {
             )}
 
             <div className="step-actions">
-              <button className="text-button" onClick={() => editing ? setEditing(false) : goBack()} data-testid="button-change-budget"><ArrowLeft size={15} /> {editing ? 'Назад кон желбите' : 'Промени буџет'}</button>
+              <button className="text-button back-button" onClick={() => editing ? setEditing(false) : goBack()} data-testid="button-change-budget"><ArrowLeft size={15} /> {editing ? 'Назад кон желбите' : 'Промени буџет'}</button>
               <div style={{ display: 'flex', gap: 9 }}>
                 {editing ? (
                   <button className="share-button" onClick={copyShareLink} data-testid="button-copy-share"><Copy size={14} /> Копирај линк</button>
