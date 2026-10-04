@@ -120,6 +120,22 @@ const starterGifts: Gift[] = [
     url: 'https://cartecadeau.guerlain.com/',
     image: 'images/karmin.jpg',
   },
+  {
+    id: 'kniga1',
+    name: 'Нова ACOTAR книга: A Court of Splintered Harmony',
+    price: 21,
+    note: 'Preorder -> amazon, стига Ноември',
+    url: 'https://www.amazon.fr/gp/product/103720008X/ref=ewc_pr_img_5?smid=A1X6FK5RDHNB96&psc=1',
+    image: 'images/kniga1.jpg',
+  },
+  {
+    id: 'kniga2',
+    name: 'Уште една нова ACOTAR книга: A Court of Forgotten Melody',
+    price: 24,
+    note: 'Preorder -> amazon, стига Јануари',
+    url: 'https://www.amazon.fr/gp/product/1037205693/ref=ewc_pr_img_4?smid=A1X6FK5RDHNB96&psc=1',
+    image: 'images/kniga2.jpg',
+  },
 ];
 const noButtonOffsets = [
   { x: 72, y: -18 },
@@ -128,7 +144,7 @@ const noButtonOffsets = [
   { x: -68, y: -20 },
   { x: 26, y: -30 },
 ];
-const money = (amount: number) => `€${amount}`;
+const money = (amount: number) => (amount >= 1000000000 ? '∞' : `€${amount}`);
 
 function validateGifts(input: unknown): Gift[] | null {
   if (!Array.isArray(input) || input.length > 100) return null;
@@ -205,6 +221,23 @@ const initialStoredBudgetLimits = typeof window !== 'undefined' ? (() => {
 })() : null;
 const queryClient = new QueryClient();
 
+// Extra styling for the gift cards: bigger photo, slightly bigger text, a nicer link button.
+const giftCardStyles = `
+  .gift-row { display: grid !important; grid-template-columns: 132px minmax(0, 1fr) auto !important; align-items: center !important; gap: 22px !important; }
+  .gift-row .gift-symbol { width: 132px !important; height: 132px !important; border-radius: 18px !important; object-fit: cover; flex-shrink: 0; }
+  .gift-row div.gift-symbol { display: flex; align-items: center; justify-content: center; font-size: 2.4rem !important; }
+  .gift-row .gift-info strong { display: block; font-size: 1.28rem !important; line-height: 1.3 !important; }
+  .gift-row .gift-info p { font-size: 1.05rem !important; line-height: 1.55 !important; margin: 8px 0 0 !important; }
+  .gift-row .gift-link { display: inline-flex !important; align-items: center; gap: 7px; margin-top: 14px !important; padding: 9px 18px !important; border: 1.5px solid currentColor; border-radius: 999px; font-size: 1rem !important; font-weight: 600; text-decoration: none !important; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .gift-row .gift-link:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14); }
+  .gift-row .gift-price { font-size: 1.25rem !important; overflow-wrap: anywhere; text-align: right; }
+  @media (max-width: 600px) {
+    .gift-row { grid-template-columns: 104px minmax(0, 1fr) !important; gap: 16px !important; }
+    .gift-row .gift-symbol { width: 104px !important; height: 104px !important; }
+    .gift-row .gift-price { grid-column: 2 !important; text-align: left !important; }
+  }
+`;
+
 function Home() {
   const { isLoading: authLoading, isAuthenticated, login, logout } = useAuth();
   const [gifts, setGifts] = useState<Gift[]>(initialShare.gifts ?? initialStored ?? starterGifts);
@@ -255,7 +288,9 @@ function Home() {
   }, [notice]);
 
   const shownGifts = useMemo(
-    () => budget === null ? gifts : gifts.filter((gift) => gift.price > budget.above && gift.price <= budget.upTo),
+    () => (budget === null ? gifts : gifts.filter((gift) => gift.price > budget.above && gift.price <= budget.upTo))
+      .slice()
+      .sort((a, b) => a.price - b.price),
     [gifts, budget],
   );
 
@@ -383,6 +418,7 @@ function Home() {
 
   return (
     <main className="app-shell">
+      <style>{giftCardStyles}</style>
       <div className="app-content">
         <header className="topbar">
           <a href="/" className="brand" aria-label="Скромна роденденска листа" onClick={(event) => { event.preventDefault(); setStep('intro'); setBudget(null); setEditing(false); }}>
@@ -518,7 +554,7 @@ function Home() {
                       : gift.photoPath
                         ? <img className="gift-symbol gift-photo" src={`/api/storage${gift.photoPath}`} alt={`Фотографија за ${gift.name}`} loading="lazy" />
                         : <div className="gift-symbol" aria-hidden="true">{gift.name.trim().charAt(0).toUpperCase()}</div>}
-                    <div className="gift-info"><strong>{gift.name}</strong>{gift.note && <p style={{ whiteSpace: 'pre-line' }}>{gift.note}</p>}{gift.url && <a className="gift-link" href={gift.url} target="_blank" rel="noreferrer">Погледни го подарокот <ExternalLink size={11} /></a>}</div>
+                    <div className="gift-info"><strong>{gift.name}</strong>{gift.note && <p style={{ whiteSpace: 'pre-line' }}>{gift.note}</p>}{gift.url && <a className="gift-link" href={gift.url} target="_blank" rel="noreferrer">Погледни го подарокот <ExternalLink size={14} /></a>}</div>
                     <span className="gift-price">{money(gift.price)}</span>
                   </article>
                 ))}
