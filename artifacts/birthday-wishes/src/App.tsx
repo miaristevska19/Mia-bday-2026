@@ -8,7 +8,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 
-type Gift = { id: string; name: string; price: number; url?: string; note?: string; photoPath?: string };
+// "image" is a file name inside the public/images folder, for example 'images/perfume.jpg'
+type Gift = { id: string; name: string; price: number; url?: string; note?: string; photoPath?: string; image?: string };
 type Step = 'intro' | 'budget' | 'gifts';
 type OwnerAccess = { claimed: boolean; isOwner: boolean };
 const STORAGE_KEY = 'birthday-wishes-v1';
@@ -27,6 +28,18 @@ function makeBudgetTiers(limits: number[] = defaultBudgetLimits): BudgetTier[] {
     max: limits[index] ?? defaultBudgetLimits[index],
   }));
 }
+
+// The four category buttons on the second screen.
+// A gift is shown when its price is above "above" and up to (and including) "upTo".
+type BudgetOption = { id: string; label: string; description: string; above: number; upTo: number };
+const budgetOptions: BudgetOption[] = [
+  { id: 'category-1', label: 'Од мене толку од госпо поќе', description: 'До 59евр', above: -1, upTo: 59 },
+  { id: 'category-2', label: 'Не барам многу', description: 'Од 59 до 150евр', above: 59, upTo: 150 },
+  { id: 'category-3', label: 'Не барам многу Премиум+', description: 'Над 150евр', above: 150, upTo: Infinity },
+  { id: 'any', label: 'Не барам многу Инфинити ∞', description: 'Сите подароци', above: -1, upTo: Infinity },
+];
+
+// The list of gifts. To add an image, upload it to public/images and add image: 'images/file-name.jpg'
 const starterGifts: Gift[] = [
   { id: 'sunglasses', name: 'Sunglasses', price: 160 },
   { id: 'fountain-pen', name: 'Fountain pen', price: 160 },
@@ -52,6 +65,7 @@ function validateGifts(input: unknown): Gift[] | null {
     if (gift.url !== undefined && typeof gift.url !== 'string') return null;
     if (gift.note !== undefined && typeof gift.note !== 'string') return null;
     if (gift.photoPath !== undefined && (typeof gift.photoPath !== 'string' || !/^\/objects\/uploads\/[a-f0-9]{64}\/[a-f0-9-]{36}$/.test(gift.photoPath))) return null;
+    if (gift.image !== undefined && (typeof gift.image !== 'string' || !/^images\/[\w.\-]{1,100}$/.test(gift.image))) return null;
     let safeUrl: string | undefined;
     if (typeof gift.url === 'string' && gift.url.trim()) {
       try {
@@ -69,6 +83,7 @@ function validateGifts(input: unknown): Gift[] | null {
       ...(safeUrl ? { url: safeUrl } : {}),
       ...(typeof gift.note === 'string' && gift.note.trim() ? { note: gift.note.trim().slice(0, 240) } : {}),
       ...(typeof gift.photoPath === 'string' ? { photoPath: gift.photoPath } : {}),
+      ...(typeof gift.image === 'string' ? { image: gift.image } : {}),
     });
   }
   return gifts;
@@ -120,7 +135,7 @@ function Home() {
   const [budgetTiers, setBudgetTiers] = useState<BudgetTier[]>(makeBudgetTiers(initialShare.budgetLimits ?? initialStoredBudgetLimits ?? defaultBudgetLimits));
   const [step, setStep] = useState<Step>('intro');
   const [noButtonOffset, setNoButtonOffset] = useState(-1);
-  const [budget, setBudget] = useState<number | null>(null);
+  const [budget, setBudget] = useState<BudgetOption | null>(null);
   const [editing, setEditing] = useState(false);
   const [notice, setNotice] = useState('');
   const [shareError, setShareError] = useState(initialShare.invalid);
@@ -164,7 +179,7 @@ function Home() {
   }, [notice]);
 
   const shownGifts = useMemo(
-    () => budget === null ? gifts : gifts.filter((gift) => gift.price <= budget),
+    () => budget === null ? gifts : gifts.filter((gift) => gift.price > budget.above && gift.price <= budget.upTo),
     [gifts, budget],
   );
 
@@ -269,14 +284,14 @@ function Home() {
     const url = makeShareUrl(gifts, budgetTiers);
     try {
       await navigator.clipboard.writeText(url);
-       setNotice('Линкот е копиран. Испрати ѝ го на сестра ти.');
+      setNotice('Линкот е копиран. Испрати ѝ го на сестра ти.');
     } catch {
       window.prompt('Копирај го линкот до роденденската листа:', url);
       setNotice('Линкот е подготвен за копирање.');
     }
   };
 
-  const stepToGifts = (value: number | null) => {
+  const stepToGifts = (value: BudgetOption | null) => {
     setBudget(value);
     setStep('gifts');
   };
@@ -315,7 +330,7 @@ function Home() {
             <div>
               <span className="eyebrow">Големото прашање овај Октомври 2026та</span>
               <h1 id="hero-title">Шо поклон<br /><em>да му купиме</em><br />на Миа?</h1>
-              <p className="hero-copy">Дали сте возбудени да видите шо сака Миа са роденден?</p>
+              <p className="hero-copy">Дали сте возбудени да видите шо сака Миа за роденден?</p>
               <div className="hero-choices">
                 <button className="primary-button" onClick={() => setStep('budget')} data-testid="button-start">
                   Да <span aria-hidden="true">→</span>
@@ -352,14 +367,11 @@ function Home() {
             <h2 id="budget-title">Избери категорија</h2>
             <p className="step-subtitle">избери категорија за да ги видиш поклоните според твоите можности</p>
             <div className="budget-options">
-              {budgetTiers.map((tier) => (
-                <button key={tier.id} className="budget-option" onClick={() => stepToGifts(tier.max)} data-testid={`button-budget-${tier.id}`}>
-                  <strong>{tier.label}</strong><span>До {money(tier.max)}</span>
+              {budgetOptions.map((option) => (
+                <button key={option.id} className="budget-option" onClick={() => stepToGifts(option)} data-testid={`button-budget-${option.id}`}>
+                  <strong>{option.label}</strong><span>{option.description}</span>
                 </button>
               ))}
-              <button className="budget-option" onClick={() => stepToGifts(null)} data-testid="button-budget-any">
-                <strong>Не барам многу инфинити</strong><span>Прикажи ги сите желби</span>
-              </button>
             </div>
             <div className="step-actions">
               <button className="text-button" onClick={goBack} data-testid="button-back-intro"><ArrowLeft size={15} /> Назад</button>
@@ -373,7 +385,7 @@ function Home() {
             <div className="step-top"><span className="step-count">02 / 02 · идеи за подарок</span><span className="step-track is-full"><i /></span></div>
             <div className="gift-heading">
               <div>
-                <span className="eyebrow">{budget === null ? 'Сите желби' : `До ${money(budget)}`}</span>
+                <span className="eyebrow">{budget === null ? 'Сите желби' : budget.description}</span>
                 <h2 id="gift-title">{editing ? 'Твоите роденденски желби' : 'Можеби ќе те израдуваат.'}</h2>
                 <p className="step-subtitle">{editing ? 'Додај детали, смени цена или отстрани желба.' : 'Неколку идеи за подароци што би ти се допаднале.'}</p>
               </div>
@@ -435,7 +447,11 @@ function Home() {
               <div className="gift-list">
                 {shownGifts.map((gift, index) => (
                   <article className="gift-row" key={gift.id} style={{ animationDelay: `${index * 80}ms` }} data-testid={`card-wish-${gift.id}`}>
-                    {gift.photoPath ? <img className="gift-symbol gift-photo" src={`/api/storage${gift.photoPath}`} alt={`Фотографија за ${gift.name}`} loading="lazy" /> : <div className="gift-symbol" aria-hidden="true">{gift.name.trim().charAt(0).toUpperCase()}</div>}
+                    {gift.image
+                      ? <img className="gift-symbol gift-photo" src={`${import.meta.env.BASE_URL}${gift.image}`} alt={`Фотографија за ${gift.name}`} loading="lazy" />
+                      : gift.photoPath
+                        ? <img className="gift-symbol gift-photo" src={`/api/storage${gift.photoPath}`} alt={`Фотографија за ${gift.name}`} loading="lazy" />
+                        : <div className="gift-symbol" aria-hidden="true">{gift.name.trim().charAt(0).toUpperCase()}</div>}
                     <div className="gift-info"><strong>{gift.name}</strong>{gift.note && <p>{gift.note}</p>}{gift.url && <a className="gift-link" href={gift.url} target="_blank" rel="noreferrer">Погледни го подарокот <ExternalLink size={11} /></a>}</div>
                     <span className="gift-price">{money(gift.price)}</span>
                   </article>
@@ -447,7 +463,7 @@ function Home() {
               <button className="text-button" onClick={() => editing ? setEditing(false) : goBack()} data-testid="button-change-budget"><ArrowLeft size={15} /> {editing ? 'Назад кон желбите' : 'Промени буџет'}</button>
               <div style={{ display: 'flex', gap: 9 }}>
                 {editing ? (
-                    <button className="share-button" onClick={copyShareLink} data-testid="button-copy-share"><Copy size={14} /> Копирај линк</button>
+                  <button className="share-button" onClick={copyShareLink} data-testid="button-copy-share"><Copy size={14} /> Копирај линк</button>
                 ) : (
                   <>
                     {ownerAccess?.isOwner && <button className="edit-button" onClick={() => setEditing(true)} data-testid="button-edit-list"><Pencil size={14} /> Уреди листа</button>}
