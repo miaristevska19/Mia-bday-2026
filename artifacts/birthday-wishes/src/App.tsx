@@ -10,7 +10,7 @@ import NotFound from '@/pages/not-found';
 
 // "image" is a file name inside the public/images folder, for example 'images/perfume.jpg'
 type Gift = { id: string; name: string; price: number; url?: string; note?: string; photoPath?: string; image?: string };
-type Step = 'intro' | 'budget' | 'gifts';
+type Step = 'intro' | 'budget' | 'gifts' | 'done';
 type OwnerAccess = { claimed: boolean; isOwner: boolean };
 const STORAGE_KEY = 'birthday-wishes-v1';
 const BUDGET_LIMITS_STORAGE_KEY = 'birthday-wishes-budget-limits-v1';
@@ -31,19 +31,39 @@ function makeBudgetTiers(limits: number[] = defaultBudgetLimits): BudgetTier[] {
 
 // The four category buttons on the second screen.
 // A gift is shown when its price is above "above" and up to (and including) "upTo".
-type BudgetOption = { id: string; label: string; description: string; above: number; upTo: number };
+type BudgetOption = { id: string; label: string; description: string; title: string; subtitle: string; above: number; upTo: number };
 const budgetOptions: BudgetOption[] = [
-  { id: 'category-1', label: 'Од мене толку од госпо поќе', description: 'До 59евр', above: -1, upTo: 59 },
-  { id: 'category-2', label: 'Не барам многу', description: 'Од 59 до 150евр', above: 59, upTo: 150 },
-  { id: 'category-3', label: 'Не барам многу Премиум+', description: 'Над 150евр', above: 150, upTo: Infinity },
-  { id: 'any', label: 'Не барам многу Инфинити ∞', description: 'Сите подароци', above: -1, upTo: Infinity },
+  { id: 'category-1', label: 'Од мене толку од госпо поќе', description: 'До 59евр', title: 'Категорија: Од мене толку, од госпо поќе', subtitle: 'Мали ситници ама голема среќа ❤️', above: -1, upTo: 59 },
+  { id: 'category-2', label: 'Не барам многу', description: 'Од 59 до 150евр', title: 'Категорија: Не барам многу', subtitle: 'Поголеми ситници иста среќа ✨', above: 59, upTo: 150 },
+  { id: 'category-3', label: 'Не барам многу Премиум+', description: 'Над 150евр', title: 'Категорија: Не барам многу Премиум+', subtitle: 'Нешто поскапичко 💸', above: 150, upTo: Infinity },
+  { id: 'any', label: 'Не барам многу Инфинити ∞', description: 'Сите подароци', title: 'Категорија: Не барам многу Инфинити ∞', subtitle: 'Се шо ви душа сака 🎁', above: -1, upTo: Infinity },
 ];
 
 // The list of gifts. To add an image, upload it to public/images and add image: 'images/file-name.jpg'
 const starterGifts: Gift[] = [
-  { id: 'sunglasses', name: 'Sunglasses', price: 160 },
-  { id: 'fountain-pen', name: 'Fountain pen', price: 160 },
-  { id: 'purse', name: 'Purse', price: 150 },
+  {
+    id: 'purse',
+    name: 'Чанта - Dolls kill',
+    price: 47,
+    url: 'https://www.dollskill.com/products/savage-ways-shoulder-bag',
+    image: 'images/purse.jpg',
+  },
+  {
+    id: 'fountain-pen',
+    name: 'Стило - Fountain pen',
+    price: 99,
+    note: 'Nib: Medium (M)',
+    url: 'https://appelboom.com/conklin-all-american-yellowstone-fountain-pen/',
+    image: 'images/fountain-pen.jpg',
+  },
+  {
+    id: 'sunglasses',
+    name: 'RayBan наочари',
+    price: 169,
+    note: 'Модел: RB3774D\nКафеави стакла*\n*Треба да ги пробам и ги немаше во една продавница за да се осигурам за моделот',
+    url: 'https://www.ray-ban.com/france/lunettes-de-soleil/RB3774Drb3774d-dor%C3%A9%20arista/8056262667033',
+    image: 'images/sunglasses.jpg',
+  },
 ];
 const noButtonOffsets = [
   { x: 72, y: -18 },
@@ -183,6 +203,8 @@ function Home() {
     [gifts, budget],
   );
 
+  const activeOption = budget ?? budgetOptions[budgetOptions.length - 1];
+
   const commitGifts = (next: Gift[]) => {
     setGifts(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -310,19 +332,7 @@ function Home() {
           <a href="/" className="brand" aria-label="Скромна роденденска листа" onClick={(event) => { event.preventDefault(); setStep('intro'); setBudget(null); setEditing(false); }}>
             <span className="brand-mark">с</span><span className="brand-name">Скромна роденденска листа</span>
           </a>
-          <div className="owner-bar">
-            <button
-              className="top-action"
-              onClick={handleOwnerAction}
-              disabled={!editing && (authLoading || (isAuthenticated && (ownerLoading || (ownerAccess?.claimed && !ownerAccess.isOwner))))}
-              data-testid="button-owner-edit"
-            >
-              {editing ? 'Заврши со уредување' : authLoading ? '...' : !isAuthenticated ? 'Најави се' : ownerLoading ? '...' : ownerAccess?.isOwner ? 'Уреди листа' : ownerAccess?.claimed ? 'Само сопственикот' : 'Земи сопственост'}
-            </button>
-            {isAuthenticated && <button className="top-action logout-action" onClick={logout} aria-label="Одјави се"><LogOut size={14} /><span>Одјави се</span></button>}
-          </div>
         </header>
-        {isAuthenticated && ownerAccess && !ownerAccess.claimed && <p className="owner-setup-note">Првата сметка што ќе ја преземе сопственоста ќе биде единствената што може да ја уредува листата. Направи го ова пред да го споделиш линкот.</p>}
         {shareError && <div className="warning-banner" role="alert" data-testid="status-invalid-share">Овој линк не можевме да го отвориме. Ја прикажуваме зачуваната листа, која сè уште можеш да ја уредуваш.</div>}
 
         {step === 'intro' && !editing && (
@@ -386,8 +396,8 @@ function Home() {
             <div className="gift-heading">
               <div>
                 <span className="eyebrow">{budget === null ? 'Сите желби' : budget.description}</span>
-                <h2 id="gift-title">{editing ? 'Твоите роденденски желби' : 'Можеби ќе те израдуваат.'}</h2>
-                <p className="step-subtitle">{editing ? 'Додај детали, смени цена или отстрани желба.' : 'Неколку идеи за подароци што би ти се допаднале.'}</p>
+                <h2 id="gift-title">{editing ? 'Твоите роденденски желби' : activeOption.title}</h2>
+                <p className="step-subtitle">{editing ? 'Додај детали, смени цена или отстрани желба.' : activeOption.subtitle}</p>
               </div>
               <span className="gift-count">{shownGifts.length} {shownGifts.length === 1 ? 'желба' : 'желби'}</span>
             </div>
@@ -452,10 +462,16 @@ function Home() {
                       : gift.photoPath
                         ? <img className="gift-symbol gift-photo" src={`/api/storage${gift.photoPath}`} alt={`Фотографија за ${gift.name}`} loading="lazy" />
                         : <div className="gift-symbol" aria-hidden="true">{gift.name.trim().charAt(0).toUpperCase()}</div>}
-                    <div className="gift-info"><strong>{gift.name}</strong>{gift.note && <p>{gift.note}</p>}{gift.url && <a className="gift-link" href={gift.url} target="_blank" rel="noreferrer">Погледни го подарокот <ExternalLink size={11} /></a>}</div>
+                    <div className="gift-info"><strong>{gift.name}</strong>{gift.note && <p style={{ whiteSpace: 'pre-line' }}>{gift.note}</p>}{gift.url && <a className="gift-link" href={gift.url} target="_blank" rel="noreferrer">Погледни го подарокот <ExternalLink size={11} /></a>}</div>
                     <span className="gift-price">{money(gift.price)}</span>
                   </article>
                 ))}
+              </div>
+            )}
+
+            {!editing && (
+              <div style={{ display: 'flex', justifyContent: 'center', margin: '28px 0 8px' }}>
+                <button className="primary-button" onClick={() => setStep('done')} data-testid="button-chose-gift">Го избрав поклонот !</button>
               </div>
             )}
 
@@ -474,7 +490,16 @@ function Home() {
             </div>
             {notice && <div className="feedback" role="status" data-testid="status-feedback"><Check size={14} /> {notice}</div>}
             {editing && <p className="share-note"><RotateCcw size={12} /> Промените се зачувуваат на овој уред. Копирај нов линк за да ја споделиш ажурираната листа.</p>}
-            {step === 'gifts' && !editing && <div className="share-note">Роденденот е поубав кога ќе го добиеш подарокот што го посакуваш.</div>}
+          </section>
+        )}
+        {step === 'done' && (
+          <section className="step-panel" aria-labelledby="done-title" style={{ textAlign: 'center' }} data-testid="screen-done">
+            <h2 id="done-title">Се одлучи? Супер !!</h2>
+            <p className="step-subtitle" style={{ maxWidth: 560, margin: '16px auto 0', fontSize: '1.15rem', lineHeight: 1.6 }}>Да знајш шо да избра од листата, од најскапо до најефтино, или пак нешто шо сосема не беше тука, од се срце ФАЛА ! Вие сте ми тие најбитните а се останато е само за малце fun ✨🤗❤️</p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 32 }}>
+              <button className="text-button" onClick={() => { setBudget(null); setStep('budget'); }} data-testid="button-keep-shopping"><ArrowLeft size={15} /> Actually not done shopping</button>
+              <button className="primary-button" onClick={() => { setBudget(null); setStep('intro'); }} data-testid="button-home">Почетна страна</button>
+            </div>
           </section>
         )}
       </div>
