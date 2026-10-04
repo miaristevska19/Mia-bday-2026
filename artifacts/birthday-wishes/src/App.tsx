@@ -52,7 +52,7 @@ const starterGifts: Gift[] = [
     id: 'fountain-pen',
     name: 'Стило - Fountain pen',
     price: 99,
-    note: 'Nib: Medium (M)',
+    note: 'Nib: Medium (M) искрено ова најмногу го бендисвав',
     url: 'https://appelboom.com/conklin-all-american-yellowstone-fountain-pen/',
     image: 'images/fountain-pen.jpg',
   },
@@ -291,12 +291,46 @@ const giftCardStyles = `
   .gift-row .gift-link { display: inline-flex !important; align-items: center; gap: 7px; margin-top: 14px !important; padding: 9px 18px !important; border: 1.5px solid currentColor; border-radius: 999px; font-size: 1rem !important; font-weight: 600; text-decoration: none !important; transition: transform 0.15s ease, box-shadow 0.15s ease; }
   .gift-row .gift-link:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14); }
   .gift-row .gift-price { font-size: 1.25rem !important; overflow-wrap: anywhere; text-align: right; }
+  .gift-row .gift-price.gift-price-infinite { font-size: 2.6rem !important; line-height: 1 !important; font-weight: 700; }
+  .hero .eyebrow { font-size: 1rem !important; }
+  .brand .brand-name { font-size: 1.2rem !important; }
+  .brand-icon { width: 42px; height: 42px; object-fit: contain; border-radius: 10px; flex-shrink: 0; }
+  .illustration .ribbon-note { font-size: 1.1rem !important; }
+  .illustration .gift-tag { font-size: 1.1rem !important; white-space: nowrap; }
+
+  .budget-options { display: flex !important; flex-direction: column !important; align-items: center; gap: 24px !important; max-width: 680px; margin-left: auto; margin-right: auto; }
+  .budget-option { position: relative; display: grid !important; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px; width: 100%; text-align: left !important; padding: 20px 24px !important; border-radius: 22px !important; cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+  .budget-option::before { content: attr(data-badge); display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 50%; border: 2px solid currentColor; font-size: 1.25rem; font-weight: 700; }
+  .budget-option .tier-text { display: flex !important; flex-direction: column; gap: 4px; color: inherit !important; opacity: 1 !important; }
+  .budget-option .tier-text strong { font-size: 1.15rem !important; line-height: 1.25 !important; }
+  .budget-option .tier-text small { font-size: 0.95rem; opacity: 0.8; }
+  .budget-option .tier-price { font-size: 1.05rem !important; font-weight: 700 !important; white-space: nowrap; text-align: right; color: inherit !important; opacity: 1 !important; }
+  .budget-option[data-tier="1"] { max-width: 86%; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
+  .budget-option[data-tier="2"] { max-width: 91%; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
+  .budget-option[data-tier="3"] { max-width: 96%; box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16); }
+  .budget-option[data-tier="4"] { max-width: 100%; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24); }
+  .budget-option[data-tier="4"] .tier-text strong { font-size: 1.3rem !important; }
+  .budget-option:hover { transform: translateY(-3px); }
+  .budget-option:not(:last-child)::after { content: '↓'; position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); font-size: 1.1rem; line-height: 1; opacity: 0.55; }
+
   @media (max-width: 600px) {
+    .budget-option, .budget-option[data-tier] { max-width: 100% !important; padding: 16px 18px !important; gap: 14px !important; grid-template-columns: auto minmax(0, 1fr) !important; }
+    .budget-option::before { width: 40px; height: 40px; font-size: 1.1rem; }
+    .budget-option .tier-price { grid-column: 2; text-align: left; }
     .gift-row { grid-template-columns: 104px minmax(0, 1fr) !important; gap: 16px !important; }
     .gift-row .gift-symbol { width: 104px !important; height: 104px !important; }
     .gift-row .gift-price { grid-column: 2 !important; text-align: left !important; }
   }
 `;
+
+// The icon in the top left corner. Upload your icon to public/images and call it icon.png
+// (icon.jpg, icon.jpeg, icon.webp and icon.svg also work). If no file is found, the old letter is shown.
+const iconFiles = ['icon.png', 'icon.jpg', 'icon.jpeg', 'icon.webp', 'icon.svg'];
+function BrandIcon() {
+  const [index, setIndex] = useState(0);
+  if (index >= iconFiles.length) return <span className="brand-mark">с</span>;
+  return <img className="brand-icon" src={`${import.meta.env.BASE_URL}images/${iconFiles[index]}`} alt="" onError={() => setIndex((current) => current + 1)} />;
+}
 
 function Home() {
   const { isLoading: authLoading, isAuthenticated, login, logout } = useAuth();
@@ -464,6 +498,26 @@ function Home() {
     }
   };
 
+  // Copies the names of the gifts in the open category, one under the other
+  const copyGiftNames = async () => {
+    const text = shownGifts.map((gift) => gift.name).join('\n');
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      try { copied = document.execCommand('copy'); } catch { copied = false; }
+      document.body.removeChild(area);
+    }
+    setNotice(copied ? 'Листата е копирана' : 'Не успеавме да ја копираме листата.');
+  };
+
   const stepToGifts = (value: BudgetOption | null) => {
     setBudget(value);
     setStep('gifts');
@@ -492,11 +546,7 @@ function Home() {
               setEditing(false); 
             }}
           >
-            <img
-              className="brand-icon"
-              src={`${import.meta.env.BASE_URL}images/icon.png`}
-              alt=""
-            />
+            <BrandIcon />
             <span className="brand-name">Скромна роденденска листа</span>
           </a>
         </header>
@@ -544,9 +594,17 @@ function Home() {
             <h2 id="budget-title">Избери категорија</h2>
             <p className="step-subtitle">Избери категорија за да ги видиш поклоните според твоите можности</p>
             <div className="budget-options">
-              {budgetOptions.map((option) => (
-                <button key={option.id} className="budget-option" onClick={() => stepToGifts(option)} data-testid={`button-budget-${option.id}`}>
-                  <strong>{option.label}</strong><span>{option.description}</span>
+              {budgetOptions.map((option, index) => (
+                <button
+                  key={option.id}
+                  className="budget-option"
+                  data-tier={index + 1}
+                  data-badge={index === budgetOptions.length - 1 ? '∞' : String(index + 1)}
+                  onClick={() => stepToGifts(option)}
+                  data-testid={`button-budget-${option.id}`}
+                >
+                  <span className="tier-text"><strong>{option.label}</strong><small>{option.subtitle}</small></span>
+                  <span className="tier-price">{option.description}</span>
                 </button>
               ))}
             </div>
@@ -630,7 +688,7 @@ function Home() {
                         ? <img className="gift-symbol gift-photo" src={`/api/storage${gift.photoPath}`} alt={`Фотографија за ${gift.name}`} loading="lazy" />
                         : <div className="gift-symbol" aria-hidden="true">{gift.name.trim().charAt(0).toUpperCase()}</div>}
                     <div className="gift-info"><strong>{gift.name}</strong>{gift.note && <p style={{ whiteSpace: 'pre-line' }}>{gift.note}</p>}{gift.url && <a className="gift-link" href={gift.url} target="_blank" rel="noreferrer">Погледни го подарокот <ExternalLink size={14} /></a>}</div>
-                    <span className="gift-price">{money(gift.price)}</span>
+                    <span className={`gift-price${gift.price >= 1000000000 ? ' gift-price-infinite' : ''}`}>{money(gift.price)}</span>
                   </article>
                 ))}
               </div>
@@ -650,7 +708,7 @@ function Home() {
                 ) : (
                   <>
                     {ownerAccess?.isOwner && <button className="edit-button" onClick={() => setEditing(true)} data-testid="button-edit-list"><Pencil size={14} /> Уреди листа</button>}
-                    <button className="share-button" onClick={copyShareLink} data-testid="button-copy-share"><Copy size={14} /> Сподели листа</button>
+                    <button className="share-button" onClick={copyGiftNames} data-testid="button-copy-list"><Copy size={14} /> Копирај ја листата</button>
                   </>
                 )}
               </div>
