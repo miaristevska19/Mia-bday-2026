@@ -33,9 +33,9 @@ function makeBudgetTiers(limits: number[] = defaultBudgetLimits): BudgetTier[] {
 // A gift is shown when its price is above "above" and up to (and including) "upTo".
 type BudgetOption = { id: string; label: string; description: string; title: string; subtitle: string; above: number; upTo: number };
 const budgetOptions: BudgetOption[] = [
-  { id: 'category-1', label: 'Од мене толку од госпо поќе', description: 'До 59евр', title: 'Категорија: Од мене толку, од госпо поќе', subtitle: 'Мали ситници ама голема среќа ❤️', above: -1, upTo: 59 },
-  { id: 'category-2', label: 'Не барам многу', description: 'Од 59 до 150евр', title: 'Категорија: Не барам многу', subtitle: 'Поголеми ситници иста среќа ✨', above: 59, upTo: 150 },
-  { id: 'category-3', label: 'Не барам многу Премиум+', description: 'Над 150евр', title: 'Категорија: Не барам многу Премиум+', subtitle: 'Нешто поскапичко 💸', above: 150, upTo: Infinity },
+  { id: 'category-1', label: 'Од мене толку од госпо поќе', description: 'До 59€', title: 'Категорија: Од мене толку, од госпо поќе', subtitle: 'Мали ситници ама голема среќа ❤️', above: -1, upTo: 59 },
+  { id: 'category-2', label: 'Не барам многу', description: 'Од 59 до 150€', title: 'Категорија: Не барам многу', subtitle: 'Поголеми ситници иста среќа ✨', above: 59, upTo: 150 },
+  { id: 'category-3', label: 'Не барам многу Премиум+', description: 'Над 150€', title: 'Категорија: Не барам многу Премиум+', subtitle: 'Нешто поскапичко 💸', above: 150, upTo: Infinity },
   { id: 'any', label: 'Не барам многу Инфинити ∞', description: 'Сите подароци', title: 'Категорија: Не барам многу Инфинити ∞', subtitle: 'Се шо ви душа сака 🎁', above: -1, upTo: Infinity },
 ];
 
@@ -63,6 +63,22 @@ const starterGifts: Gift[] = [
     note: 'Модел: RB3774D\nКафеави стакла*\n*Треба да ги пробам и ги немаше во една продавница за да се осигурам за моделот',
     url: 'https://www.ray-ban.com/france/lunettes-de-soleil/RB3774Drb3774d-dor%C3%A9%20arista/8056262667033',
     image: 'images/sunglasses.jpg',
+  },
+  {
+    id: 'peace',
+    name: 'World peace',
+    price: 999999999999999,
+    note: 'Само ако сте во можност',
+    url: 'https://www.youtube.com/watch?v=Aq5WXmQQooo',
+    image: 'images/peace.jpg',
+  },
+  {
+    id: 'burek',
+    name: 'Бурек од Фреш',
+    price: 0.7,
+    note: 'Од ова поубо нема',
+    url: 'https://maps.app.goo.gl/6XE2Ms6Rzi2mvwUi7',
+    image: 'images/burek.jpg',
   },
 ];
 const noButtonOffsets = [
@@ -496,9 +512,28 @@ function Home() {
           <section className="step-panel" aria-labelledby="done-title" style={{ textAlign: 'center' }} data-testid="screen-done">
             <h2 id="done-title">Се одлучи? Супер !!</h2>
             <p className="step-subtitle" style={{ maxWidth: 560, margin: '16px auto 0', fontSize: '1.15rem', lineHeight: 1.6 }}>Да знајш шо да избра од листата, од најскапо до најефтино, или пак нешто шо сосема не беше тука, од се срце ФАЛА ! Вие сте ми тие најбитните а се останато е само за малце fun ✨🤗❤️</p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 32 }}>
-              <button className="text-button" onClick={() => { setBudget(null); setStep('budget'); }} data-testid="button-keep-shopping"><ArrowLeft size={15} /> Actually not done shopping</button>
-              <button className="primary-button" onClick={() => { setBudget(null); setStep('intro'); }} data-testid="button-home">Почетна страна</button>
+            <img
+              src={`${import.meta.env.BASE_URL}images/thanks.jpg`}
+              alt=""
+              onError={(event) => { event.currentTarget.style.display = 'none'; }}
+              style={{ display: 'block', width: '100%', maxWidth: 360, margin: '28px auto 0', borderRadius: 20, boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)', objectFit: 'cover' }}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, marginTop: 32 }}>
+              <button
+                className="primary-button"
+                onClick={() => { setBudget(null); setStep('budget'); }}
+                style={{ width: '100%', maxWidth: 320, padding: '18px 28px', fontSize: '1.15rem', fontWeight: 700, borderRadius: 18, justifyContent: 'center', boxShadow: '0 8px 22px rgba(0, 0, 0, 0.18)' }}
+                data-testid="button-keep-shopping"
+              >
+                Actually not done shopping
+              </button>
+              <button
+                onClick={() => { setBudget(null); setStep('intro'); }}
+                style={{ width: '100%', maxWidth: 210, padding: '11px 20px', fontSize: '0.95rem', fontWeight: 600, borderRadius: 14, border: '1.5px solid currentColor', background: 'transparent', color: 'inherit', cursor: 'pointer', fontFamily: 'inherit' }}
+                data-testid="button-home"
+              >
+                Почетна страна
+              </button>
             </div>
           </section>
         )}
