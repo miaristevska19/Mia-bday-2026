@@ -184,13 +184,13 @@ const starterGifts: Gift[] = [
     url: 'https://www.zalando.fr/luvia-cosmetics-all-eye-want-set-de-brosses-a-maquillage-pearl-whitecoffee-brown-lui34j00i-t11.html',
     image: 'images/brushes.jpg',
   },
-  {
-    id: 'kolk',
-    name: 'Колк шо не крцка',
-    price: 9999999999999,
-    note: 'Можи и from the dark web, не се жалам',
-    url: 'https://www.zalando.fr/luvia-cosmetics-all-eye-want-set-de-brosses-a-maquillage-pearl-whitecoffee-brown-lui34j00i-t11.html',
-    image: 'images/kolk.jpg',
+   {
+    id: 'weeknd',
+    name: 'The Weeknd албум(и)',
+    price: 36,
+    note: 'House of Balloons, My dear Melancholy, Beauty behind the madness... можи и ЦДња, иск сите ги сакам',
+    url: 'https://www.fnac.com/a8920461/The-Weeknd-House-Of-Balloons-Vinyle-album',
+    image: 'images/weeknd.jpg',
   },
 ];
 const noButtonOffsets = [
