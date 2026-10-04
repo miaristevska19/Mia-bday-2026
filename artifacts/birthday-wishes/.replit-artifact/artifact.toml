@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Birthday Wishes"
+description = "A private-feeling, shareable birthday gift wish list with budget filtering, a guided introduction, and an editor that lets the owner update gifts and share an updated link."
+version = "1.0.0"
+id = "artifacts/birthday-wishes"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21784
+
+[services.development]
+run = "pnpm --filter @workspace/birthday-wishes run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/birthday-wishes", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/birthday-wishes/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21784"
+BASE_PATH = "/"
